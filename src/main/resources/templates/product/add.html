@@ -7,69 +7,156 @@
 <head>
     <meta charset="UTF-8">
     <title>Add Product</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS (giống trang list) -->
+    <style>
+        body {
+            background: linear-gradient(to right, #eef2f3, #dfe9f3);
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        .card-custom {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+
+        h2 {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 5px rgba(13,110,253,0.4);
+        }
+
+        .btn-success {
+            border-radius: 10px;
+            padding: 8px 20px;
+        }
+
+        .btn-secondary {
+            border-radius: 10px;
+            padding: 8px 20px;
+        }
+
+        img {
+            border-radius: 10px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 
 <body>
 
-<div layout:fragment="content" class="container body-content">
+<div layout:fragment="content" class="container">
 
-    <h2>Add Product</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
 
-    <form th:action="@{/products/save}" 
-          th:object="${product}" 
-          method="post" 
-          class="form">
+            <div class="card-custom">
 
-        <!-- Name -->
-        <div class="form-group mb-3">
-            <label for="name">Name:</label>
-            <input class="form-control"
-                   type="text"
-                   th:field="*{name}"
-                   id="name"
-                   placeholder="Product Name">
+                <h2>Add Product</h2>
+
+                <form th:action="@{/products/save}"
+                      th:object="${product}"
+                      method="post">
+
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input class="form-control"
+                               type="text"
+                               th:field="*{name}"
+                               placeholder="Enter product name">
+                    </div>
+
+                    <!-- Image -->
+                    <div class="mb-3">
+                        <label class="form-label">Image URL</label>
+                        <input class="form-control"
+                               type="text"
+                               th:field="*{image}"
+                               id="imageInput"
+                               placeholder="http://image.jpg">
+                    </div>
+
+                    <!-- Preview -->
+                    <div class="mb-3 text-center">
+                        <img id="preview"
+                             src=""
+                             class="img-fluid d-none"
+                             style="max-height: 150px;">
+                    </div>
+
+                    <!-- Price -->
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input class="form-control"
+                               type="number"
+                               th:field="*{price}"
+                               placeholder="Enter price">
+                    </div>
+
+                    <!-- Category -->
+                    <div class="mb-4">
+                        <label class="form-label">Category</label>
+                        <select th:field="*{category}" class="form-select">
+                            <option value="">-- Select Category --</option>
+                            <option th:each="category : ${categories}"
+                                    th:value="${category.id}"
+                                    th:text="${category.name}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="/products" class="btn btn-secondary">
+                            Back
+                        </a>
+
+                        <button type="submit" class="btn btn-success">
+                            Add Product
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
-
-        <!-- Image -->
-        <div class="form-group mb-3">
-            <label for="image">Image URL:</label>
-            <input class="form-control"
-                   type="text"
-                   th:field="*{image}"
-                   id="image"
-                   placeholder="http://image.jpg">
-        </div>
-
-        <!-- Price -->
-        <div class="form-group mb-3">
-            <label for="price">Price:</label>
-            <input class="form-control"
-                   type="number"
-                   th:field="*{price}"
-                   id="price"
-                   placeholder="Price">
-        </div>
-
-        <!-- Category -->
-        <div class="form-group mb-3">
-            <label for="category">Category:</label>
-            <select th:field="*{category}" class="form-control" id="category">
-                <option value="">-- Select Category --</option>
-                <option th:each="category : ${categories}"
-                        th:value="${category.id}"
-                        th:text="${category.name}">
-                </option>
-            </select>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit" class="btn btn-success">
-            Add Product
-        </button>
-
-    </form>
+    </div>
 
 </div>
+
+<!-- Preview Image Script -->
+<script>
+    const input = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+
+    input.addEventListener("input", function () {
+        if (this.value) {
+            preview.src = this.value;
+            preview.classList.remove("d-none");
+        } else {
+            preview.classList.add("d-none");
+        }
+    });
+</script>
 
 </body>
 </html>
