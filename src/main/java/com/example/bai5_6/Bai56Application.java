@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Bai56Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Bai56Application.class, args);
+        SpringApplication.run(Bai56Application.class, args);
 	}
 
 }
