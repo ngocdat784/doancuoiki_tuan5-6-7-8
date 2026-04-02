@@ -65,4 +65,35 @@ public class ProductService {
 
         return productRepository.findByNameContainingIgnoreCase(keyword, pageable);
     }
+    public Page<Product> filterByCategory(Integer categoryId, int page, String sortDir) {
+
+    Sort sort = sortDir.equals("asc")
+            ? Sort.by("price").ascending()
+            : Sort.by("price").descending();
+
+    Pageable pageable = PageRequest.of(page, 5, sort);
+
+    return productRepository.findByCategoryId(categoryId, pageable);
+}
+public Page<Product> searchAndFilter(String keyword, Integer categoryId, int page, String sortDir) {
+
+    Sort sort = sortDir.equals("asc")
+            ? Sort.by("price").ascending()
+            : Sort.by("price").descending();
+
+    Pageable pageable = PageRequest.of(page, 5, sort);
+
+    if (keyword != null && !keyword.isEmpty() && categoryId != null) {
+        return productRepository
+                .findByNameContainingIgnoreCaseAndCategoryId(keyword, categoryId, pageable);
+    } else if (keyword != null && !keyword.isEmpty()) {
+        return productRepository
+                .findByNameContainingIgnoreCase(keyword, pageable);
+    } else if (categoryId != null) {
+        return productRepository
+                .findByCategoryId(categoryId, pageable);
+    } else {
+        return productRepository.findAll(pageable);
+    }
+}
 }

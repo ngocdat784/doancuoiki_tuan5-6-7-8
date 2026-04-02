@@ -33,22 +33,11 @@
 
         .table tbody tr:hover {
             background-color: #f1f1f1;
-            transition: 0.3s;
         }
 
         img {
             border-radius: 10px;
             object-fit: cover;
-        }
-
-        .btn-primary {
-            border-radius: 10px;
-            padding: 8px 16px;
-        }
-
-        .btn-secondary, .btn-danger {
-            border-radius: 8px;
-            padding: 5px 12px;
         }
 
         h2 {
@@ -66,39 +55,54 @@
 
         <h2>Product Management</h2>
 
-        <!-- SEARCH + SORT -->
+        <!-- SEARCH + SORT + FILTER -->
         <div class="row mb-3">
 
             <!-- SEARCH -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <form th:action="@{/products/search}" method="get" class="d-flex">
-                    <input type="text"
-                           name="keyword"
+                    <input type="text" name="keyword"
                            class="form-control me-2"
                            placeholder="Nhập tên sản phẩm..."
                            th:value="${keyword}">
 
-                    <!-- giữ sort -->
+                    <!-- giữ sort + category -->
                     <input type="hidden" name="sortDir" th:value="${sortDir}">
+                    <input type="hidden" name="categoryId" th:value="${categoryId}">
 
-                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    <button type="submit" class="btn btn-primary">Tìm</button>
                 </form>
             </div>
 
             <!-- SORT -->
             <div class="col-md-3">
                 <form method="get"
-                      th:action="${keyword != null} ? @{/products/search} : @{/products}">
+                      th:action="@{/products/search}">
 
-                    <!-- giữ keyword nếu có -->
                     <input type="hidden" name="keyword" th:value="${keyword}">
+                    <input type="hidden" name="categoryId" th:value="${categoryId}">
 
                     <select name="sortDir" class="form-select" onchange="this.form.submit()">
-                        <option value="asc" th:selected="${sortDir == 'asc'}">
-                            Giá tăng dần
-                        </option>
-                        <option value="desc" th:selected="${sortDir == 'desc'}">
-                            Giá giảm dần
+                        <option value="asc" th:selected="${sortDir == 'asc'}">Giá tăng</option>
+                        <option value="desc" th:selected="${sortDir == 'desc'}">Giá giảm</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- FILTER CATEGORY -->
+            <div class="col-md-3">
+                <form method="get" th:action="@{/products/search}">
+
+                    <input type="hidden" name="keyword" th:value="${keyword}">
+                    <input type="hidden" name="sortDir" th:value="${sortDir}">
+
+                    <select name="categoryId" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Tất cả danh mục --</option>
+
+                        <option th:each="c : ${categories}"
+                                th:value="${c.id}"
+                                th:text="${c.name}"
+                                th:selected="${c.id == categoryId}">
                         </option>
                     </select>
                 </form>
@@ -106,17 +110,18 @@
 
         </div>
 
-        <!-- Hiển thị keyword -->
+        <!-- Keyword -->
         <div th:if="${keyword != null}">
-            <p>Kết quả tìm kiếm cho: <b th:text="${keyword}"></b></p>
+            <p>Kết quả tìm kiếm: <b th:text="${keyword}"></b></p>
         </div>
 
+        <!-- Button -->
         <a th:href="@{/products/add}" class="btn btn-primary mb-3">
             + Create New Product
         </a>
 
         <!-- TABLE -->
-        <table class="table table-striped align-middle text-center">
+        <table class="table table-striped text-center">
             <thead>
             <tr>
                 <th>#</th>
@@ -130,67 +135,71 @@
 
             <tbody>
 
-            <!-- Không có dữ liệu -->
+            <!-- Empty -->
             <tr th:if="${#lists.isEmpty(products)}">
-                <td colspan="6" class="text-danger">
-                    Không tìm thấy sản phẩm nào
-                </td>
+                <td colspan="6" class="text-danger">Không có sản phẩm</td>
             </tr>
 
-            <!-- Danh sách -->
-            <tr th:each="product : ${products}">
-                <td th:text="${product.id}"></td>
-
-                <td th:text="${product.name}"></td>
+            <!-- Data -->
+            <tr th:each="p : ${products}">
+                <td th:text="${p.id}"></td>
+                <td th:text="${p.name}"></td>
 
                 <td>
-                    <img th:src="${product.image}" width="120" height="90">
+                    <img th:src="${p.image}" width="100">
                 </td>
 
                 <td>
-                    <span class="badge bg-success" th:text="${product.price}"></span>
+                    <span class="badge bg-success" th:text="${p.price}"></span>
                 </td>
 
-                <td th:text="${product.category != null ? product.category.name : 'N/A'}"></td>
+                <td th:text="${p.category != null ? p.category.name : 'N/A'}"></td>
 
-                <td>
-                    <a th:href="@{/products/edit/{id}(id=${product.id})}"
-                       class="btn btn-secondary btn-sm">Edit</a>
+               <td>
 
-                    <a th:href="@{/products/delete/{id}(id=${product.id})}"
-                       class="btn btn-danger btn-sm"
-                       onclick="return confirm('Bạn có chắc muốn xóa?')">Delete</a>
-                </td>
+    <a th:href="@{/cart/add/{id}(id=${p.id})}"
+       class="btn btn-success btn-sm">
+        Add to Cart
+    </a>
+
+    <a th:href="@{/products/edit/{id}(id=${p.id})}"
+       class="btn btn-secondary btn-sm">Edit</a>
+
+    <a th:href="@{/products/delete/{id}(id=${p.id})}"
+       class="btn btn-danger btn-sm"
+       onclick="return confirm('Xóa?')">Delete</a>
+
+</td>
             </tr>
 
             </tbody>
         </table>
 
         <!-- PAGINATION -->
-        <div class="d-flex justify-content-center align-items-center mt-4">
+        <div class="d-flex justify-content-center mt-4">
 
             <!-- Previous -->
-            <a th:if="${currentPage > 0 and keyword != null}"
-               th:href="@{/products/search(keyword=${keyword}, page=${currentPage - 1}, sortDir=${sortDir})}"
+            <a th:if="${currentPage > 0}"
+               th:href="@{/products/search(
+                    keyword=${keyword},
+                    categoryId=${categoryId},
+                    page=${currentPage - 1},
+                    sortDir=${sortDir})}"
                class="btn btn-secondary me-2">Previous</a>
 
-            <a th:if="${currentPage > 0 and keyword == null}"
-               th:href="@{/products(page=${currentPage - 1}, sortDir=${sortDir})}"
-               class="btn btn-secondary me-2">Previous</a>
-
-            <!-- Page info -->
+            <!-- Page -->
             <span class="mx-3">
                 Trang <b th:text="${currentPage + 1}"></b> /
                 <b th:text="${totalPages}"></b>
             </span>
 
             <!-- Next -->
-            <a th:if="${currentPage < totalPages - 1 and keyword != null}"
-               th:href="@{/products/search(keyword=${keyword}, page=${currentPage + 1}, sortDir=${sortDir})}"
-               class="btn btn-secondary ms-2">Next</a>
-
-            <a th:if="${currentPage < totalPages - 1 and keyword == null}"
-               th:href="@{/products(page=${currentPage + 1}, sortDir=${sortDir})}"
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/products/search(
+                    keyword=${keyword},
+                    categoryId=${categoryId},
+                    page=${currentPage + 1},
+                    sortDir=${sortDir})}"
                class="btn btn-secondary ms-2">Next</a>
 
         </div>

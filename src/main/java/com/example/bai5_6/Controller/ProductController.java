@@ -21,22 +21,30 @@ public class ProductController {
     @Autowired
     private CategoryService categoryService;
 
-    // ================== LIST + PAGINATION + SORT ==================
     @GetMapping
-    public String listProducts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "asc") String sortDir,
-            Model model) {
+public String listProducts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "asc") String sortDir,
+        @RequestParam(required = false) Integer categoryId,
+        Model model) {
 
-        Page<Product> productPage = productService.getProducts(page, sortDir);
+    Page<Product> productPage;
 
-        model.addAttribute("products", productPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", productPage.getTotalPages());
-        model.addAttribute("sortDir", sortDir);
-
-        return "product/list";
+    if (categoryId != null) {
+        productPage = productService.filterByCategory(categoryId, page, sortDir);
+    } else {
+        productPage = productService.getProducts(page, sortDir);
     }
+
+    model.addAttribute("products", productPage.getContent());
+    model.addAttribute("currentPage", page);
+    model.addAttribute("totalPages", productPage.getTotalPages());
+    model.addAttribute("sortDir", sortDir);
+    model.addAttribute("categoryId", categoryId);
+    model.addAttribute("categories", categoryService.getAllCategories());
+
+    return "product/list";
+}
 
     // ================== ADD ==================
     @GetMapping("/add")
@@ -69,22 +77,25 @@ public class ProductController {
         return "redirect:/products";
     }
 
-    // ================== SEARCH + PAGINATION + SORT ==================
-    @GetMapping("/search")
-    public String searchProduct(
-            @RequestParam("keyword") String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "asc") String sortDir,
-            Model model) {
+   @GetMapping("/search")
+public String searchProduct(
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) Integer categoryId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "asc") String sortDir,
+        Model model) {
 
-        Page<Product> productPage = productService.searchByName(keyword, page, sortDir);
+    Page<Product> productPage =
+            productService.searchAndFilter(keyword, categoryId, page, sortDir);
 
-        model.addAttribute("products", productPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", productPage.getTotalPages());
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("sortDir", sortDir);
+    model.addAttribute("products", productPage.getContent());
+    model.addAttribute("currentPage", page);
+    model.addAttribute("totalPages", productPage.getTotalPages());
+    model.addAttribute("keyword", keyword);
+    model.addAttribute("sortDir", sortDir);
+    model.addAttribute("categoryId", categoryId);
+    model.addAttribute("categories", categoryService.getAllCategories());
 
-        return "product/list";
-    }
+    return "product/list";
+}
 }
