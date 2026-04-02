@@ -1,13 +1,9 @@
 package com.example.bai5_6.Controller;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.bai5_6.Model.Product;
 import com.example.bai5_6.Service.CategoryService;
@@ -25,15 +21,24 @@ public class ProductController {
     @Autowired
     private CategoryService categoryService;
 
-    // Hiển thị danh sách sản phẩm
+    // ================== LIST + PAGINATION + SORT ==================
     @GetMapping
-    public String listProducts(Model model) {
-        List<Product> productList = productService.getAllProducts();
-        model.addAttribute("products", productList);
+    public String listProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            Model model) {
+
+        Page<Product> productPage = productService.getProducts(page, sortDir);
+
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("sortDir", sortDir);
+
         return "product/list";
     }
 
-    // Hiển thị form thêm
+    // ================== ADD ==================
     @GetMapping("/add")
     public String showAddForm(Model model) {
         model.addAttribute("product", new Product());
@@ -41,14 +46,14 @@ public class ProductController {
         return "product/add";
     }
 
-    // Lưu sản phẩm (thêm + sửa)
+    // ================== SAVE ==================
     @PostMapping("/save")
     public String saveProduct(@ModelAttribute("product") Product product) {
         productService.saveProduct(product);
         return "redirect:/products";
     }
 
-    // Hiển thị form sửa
+    // ================== EDIT ==================
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model) {
         Product product = productService.getProductById(id);
@@ -57,10 +62,29 @@ public class ProductController {
         return "product/edit";
     }
 
-    // Xóa sản phẩm
+    // ================== DELETE ==================
     @GetMapping("/delete/{id}")
     public String deleteProduct(@PathVariable("id") Integer id) {
         productService.deleteProduct(id);
         return "redirect:/products";
+    }
+
+    // ================== SEARCH + PAGINATION + SORT ==================
+    @GetMapping("/search")
+    public String searchProduct(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            Model model) {
+
+        Page<Product> productPage = productService.searchByName(keyword, page, sortDir);
+
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("sortDir", sortDir);
+
+        return "product/list";
     }
 }

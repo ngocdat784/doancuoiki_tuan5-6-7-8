@@ -8,10 +8,8 @@
     <meta charset="UTF-8">
     <title>Product List</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom CSS -->
     <style>
         body {
             background: linear-gradient(to right, #eef2f3, #dfe9f3);
@@ -68,10 +66,56 @@
 
         <h2>Product Management</h2>
 
+        <!-- SEARCH + SORT -->
+        <div class="row mb-3">
+
+            <!-- SEARCH -->
+            <div class="col-md-6">
+                <form th:action="@{/products/search}" method="get" class="d-flex">
+                    <input type="text"
+                           name="keyword"
+                           class="form-control me-2"
+                           placeholder="Nhập tên sản phẩm..."
+                           th:value="${keyword}">
+
+                    <!-- giữ sort -->
+                    <input type="hidden" name="sortDir" th:value="${sortDir}">
+
+                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                </form>
+            </div>
+
+            <!-- SORT -->
+            <div class="col-md-3">
+                <form method="get"
+                      th:action="${keyword != null} ? @{/products/search} : @{/products}">
+
+                    <!-- giữ keyword nếu có -->
+                    <input type="hidden" name="keyword" th:value="${keyword}">
+
+                    <select name="sortDir" class="form-select" onchange="this.form.submit()">
+                        <option value="asc" th:selected="${sortDir == 'asc'}">
+                            Giá tăng dần
+                        </option>
+                        <option value="desc" th:selected="${sortDir == 'desc'}">
+                            Giá giảm dần
+                        </option>
+                    </select>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- Hiển thị keyword -->
+        <div th:if="${keyword != null}">
+            <p>Kết quả tìm kiếm cho: <b th:text="${keyword}"></b></p>
+        </div>
+
         <a th:href="@{/products/add}" class="btn btn-primary mb-3">
             + Create New Product
         </a>
 
+        <!-- TABLE -->
         <table class="table table-striped align-middle text-center">
             <thead>
             <tr>
@@ -85,6 +129,15 @@
             </thead>
 
             <tbody>
+
+            <!-- Không có dữ liệu -->
+            <tr th:if="${#lists.isEmpty(products)}">
+                <td colspan="6" class="text-danger">
+                    Không tìm thấy sản phẩm nào
+                </td>
+            </tr>
+
+            <!-- Danh sách -->
             <tr th:each="product : ${products}">
                 <td th:text="${product.id}"></td>
 
@@ -109,8 +162,38 @@
                        onclick="return confirm('Bạn có chắc muốn xóa?')">Delete</a>
                 </td>
             </tr>
+
             </tbody>
         </table>
+
+        <!-- PAGINATION -->
+        <div class="d-flex justify-content-center align-items-center mt-4">
+
+            <!-- Previous -->
+            <a th:if="${currentPage > 0 and keyword != null}"
+               th:href="@{/products/search(keyword=${keyword}, page=${currentPage - 1}, sortDir=${sortDir})}"
+               class="btn btn-secondary me-2">Previous</a>
+
+            <a th:if="${currentPage > 0 and keyword == null}"
+               th:href="@{/products(page=${currentPage - 1}, sortDir=${sortDir})}"
+               class="btn btn-secondary me-2">Previous</a>
+
+            <!-- Page info -->
+            <span class="mx-3">
+                Trang <b th:text="${currentPage + 1}"></b> /
+                <b th:text="${totalPages}"></b>
+            </span>
+
+            <!-- Next -->
+            <a th:if="${currentPage < totalPages - 1 and keyword != null}"
+               th:href="@{/products/search(keyword=${keyword}, page=${currentPage + 1}, sortDir=${sortDir})}"
+               class="btn btn-secondary ms-2">Next</a>
+
+            <a th:if="${currentPage < totalPages - 1 and keyword == null}"
+               th:href="@{/products(page=${currentPage + 1}, sortDir=${sortDir})}"
+               class="btn btn-secondary ms-2">Next</a>
+
+        </div>
 
     </div>
 
