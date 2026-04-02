@@ -28,7 +28,7 @@ public class AccountService implements UserDetailsService {
         }
 
         List<GrantedAuthority> authorities = account.getRoles().stream()
-        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+        .map(role -> new SimpleGrantedAuthority(role.getName()))
         .collect(Collectors.toList());
         return new User(
                 account.getUsername(),
