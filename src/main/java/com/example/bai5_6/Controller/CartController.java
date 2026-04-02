@@ -1,7 +1,11 @@
 package com.example.bai5_6.Controller;
 
 import com.example.bai5_6.Model.CartItem;
+import com.example.bai5_6.Model.Order;
+import com.example.bai5_6.Model.OrderDetail;
 import com.example.bai5_6.Model.Product;
+import com.example.bai5_6.Repository.OrderDetailRepository;
+import com.example.bai5_6.Repository.OrderRepository;
 import com.example.bai5_6.Service.ProductService;
 
 import jakarta.servlet.http.HttpSession;
@@ -19,6 +23,11 @@ public class CartController {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+private OrderRepository orderRepository;
+
+@Autowired
+private OrderDetailRepository orderDetailRepository;
 
   @GetMapping("/add/{id}")
 public String addToCart(@PathVariable("id") Integer id, HttpSession session) {
@@ -101,5 +110,51 @@ public String decrease(@PathVariable("id") Long id, HttpSession session) {
     }
 
     return "redirect:/cart";
+}
+@PostMapping("/checkout")
+public String checkout(HttpSession session) {
+
+    List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
+
+    if (cart == null || cart.isEmpty()) {
+        return "redirect:/cart";
+    }
+
+    Order order = new Order();
+
+    double total = 0;
+
+    // Lưu order trước
+    order = orderRepository.save(order);
+
+    for (CartItem item : cart) {
+
+        Product product = productService.getProductById(item.getProductId().intValue());
+
+        OrderDetail detail = new OrderDetail(
+                order,
+                product,
+                item.getQuantity(),
+                item.getPrice()
+        );
+
+        total += item.getQuantity() * item.getPrice();
+
+        orderDetailRepository.save(detail);
+    }
+
+    // set total
+    order.setTotalAmount(total);
+    orderRepository.save(order);
+
+    // clear cart
+    session.removeAttribute("cart");
+
+    return "redirect:/cart/success";
+}
+@GetMapping("/success")
+public String checkoutSuccess(Model model) {
+    model.addAttribute("message", "Đặt hàng thành công!");
+    return "cart/success";
 }
 }
