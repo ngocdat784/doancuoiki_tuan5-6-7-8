@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{_layout}">
 
@@ -115,10 +116,11 @@
             <p>Kết quả tìm kiếm: <b th:text="${keyword}"></b></p>
         </div>
 
-        <!-- Button -->
-        <a th:href="@{/products/add}" class="btn btn-primary mb-3">
-            + Create New Product
-        </a>
+       <div sec:authorize="hasRole('ADMIN')">
+    <a th:href="@{/products/add}" class="btn btn-primary mb-3">
+        + Create New Product
+    </a>
+</div>
 
         <!-- TABLE -->
         <table class="table table-striped text-center">
@@ -155,19 +157,23 @@
 
                 <td th:text="${p.category != null ? p.category.name : 'N/A'}"></td>
 
-               <td>
+              <td>
 
+    <!-- USER + ADMIN đều thấy -->
     <a th:href="@{/cart/add/{id}(id=${p.id})}"
        class="btn btn-success btn-sm">
         Add to Cart
     </a>
 
-    <a th:href="@{/products/edit/{id}(id=${p.id})}"
-       class="btn btn-secondary btn-sm">Edit</a>
+    <!-- Chỉ ADMIN thấy -->
+    <span sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/products/edit/{id}(id=${p.id})}"
+           class="btn btn-secondary btn-sm">Edit</a>
 
-    <a th:href="@{/products/delete/{id}(id=${p.id})}"
-       class="btn btn-danger btn-sm"
-       onclick="return confirm('Xóa?')">Delete</a>
+        <a th:href="@{/products/delete/{id}(id=${p.id})}"
+           class="btn btn-danger btn-sm"
+           onclick="return confirm('Xóa?')">Delete</a>
+    </span>
 
 </td>
             </tr>
