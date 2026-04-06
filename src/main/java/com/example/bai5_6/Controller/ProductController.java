@@ -98,4 +98,5 @@ public String searchProduct(
 
     return "product/list";
 }
+
 }

@@ -56,6 +56,34 @@
 
         <h2>Product Management</h2>
 
+<!-- USER INFO -->
+<div sec:authorize="isAuthenticated()" class="mb-3 text-end">
+
+    <!-- Username -->
+    <span class="me-3">
+        User:
+        <b sec:authentication="name"></b>
+    </span>
+
+    <!-- Roles -->
+    <span class="me-3">
+        <span class="badge bg-info text-dark me-1"
+              th:each="auth : ${#authentication.authorities}"
+              th:if="${#strings.contains(auth.authority, 'ROLE_')}"
+              th:text="${#strings.replace(auth.authority, 'ROLE_', '')}">
+        </span>
+    </span>
+
+    <!-- Logout -->
+    <form th:action="@{/logout}" method="post" style="display:inline;">
+        <button class="btn btn-danger btn-sm">
+            Logout
+        </button>
+    </form>
+
+</div>
+
+
         <!-- SEARCH + SORT + FILTER -->
         <div class="row mb-3">
 
