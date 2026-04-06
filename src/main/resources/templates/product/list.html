@@ -55,6 +55,24 @@
     <div class="card-custom">
 
         <h2>Product Management</h2>
+        <!-- ORDER NAVIGATION -->
+<div class="mb-3">
+
+    <!-- USER -->
+    <span sec:authorize="hasRole('USER')">
+        <a th:href="@{/cart/my-orders}" class="btn btn-info">
+            Lịch sử đặt hàng
+        </a>
+    </span>
+
+    <!-- ADMIN -->
+    <span sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/cart/admin/orders}" class="btn btn-dark">
+            Quản lý đơn hàng
+        </a>
+    </span>
+
+</div>
 
 <!-- USER INFO -->
 <div sec:authorize="isAuthenticated()" class="mb-3 text-end">

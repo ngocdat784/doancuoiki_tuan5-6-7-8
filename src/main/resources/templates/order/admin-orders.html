@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Orders</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div layout:fragment="content" class="container mt-4">
+
+    <h2>Quản lý đơn hàng (Admin)</h2>
+
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Ngày</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Cập nhật</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="o : ${orders}">
+            <td th:text="${o.id}"></td>
+
+            <!-- USER -->
+            <td th:text="${o.username}"></td>
+
+            <td th:text="${#dates.format(o.orderDate, 'dd/MM/yyyy HH:mm')}"></td>
+
+            <td>
+                <span class="badge bg-success"
+                      th:text="${o.totalAmount}"></span>
+            </td>
+
+            <!-- CURRENT STATUS -->
+            <td>
+                <span class="badge bg-secondary"
+                      th:text="${o.status}">
+                </span>
+            </td>
+
+            <!-- UPDATE -->
+            <td>
+                <form th:action="@{/cart/admin/orders/update}" method="post">
+
+                    <input type="hidden" name="orderId" th:value="${o.id}"/>
+
+                    <select name="status" class="form-select form-select-sm mb-1">
+
+                        <option th:each="s : ${T(com.example.bai5_6.Model.OrderStatus).values()}"
+                                th:value="${s}"
+                                th:text="${s}"
+                                th:selected="${s == o.status}">
+                        </option>
+
+                    </select>
+
+                    <button class="btn btn-primary btn-sm">
+                        Update
+                    </button>
+
+                </form>
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

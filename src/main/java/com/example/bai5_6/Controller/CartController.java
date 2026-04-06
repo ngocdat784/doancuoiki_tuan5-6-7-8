@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.example.bai5_6.Model.OrderStatus;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,7 +114,7 @@ public String decrease(@PathVariable("id") Long id, HttpSession session) {
     return "redirect:/cart";
 }
 @PostMapping("/checkout")
-public String checkout(HttpSession session) {
+public String checkout(HttpSession session, Principal principal) {
 
     List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
 
@@ -122,9 +124,14 @@ public String checkout(HttpSession session) {
 
     Order order = new Order();
 
+    // ✅ SET USERNAME
+    order.setUsername(principal.getName());
+
+    // ✅ STATUS
+    order.setStatus(OrderStatus.PENDING);
+
     double total = 0;
 
-    // Lưu order trước
     order = orderRepository.save(order);
 
     for (CartItem item : cart) {
@@ -143,14 +150,38 @@ public String checkout(HttpSession session) {
         orderDetailRepository.save(detail);
     }
 
-    // set total
     order.setTotalAmount(total);
     orderRepository.save(order);
 
-    // clear cart
     session.removeAttribute("cart");
 
     return "redirect:/cart/success";
+}
+@GetMapping("/my-orders")
+public String myOrders(Model model, Principal principal) {
+
+    List<Order> orders = orderRepository.findByUsername(principal.getName());
+
+    model.addAttribute("orders", orders);
+    return "order/my-orders";
+}
+@GetMapping("/admin/orders")
+public String allOrders(Model model) {
+    model.addAttribute("orders", orderRepository.findAll());
+    return "order/admin-orders";
+}
+@PostMapping("/admin/orders/update")
+public String updateStatus(@RequestParam int orderId,
+                           @RequestParam OrderStatus status) {
+
+    Order order = orderRepository.findById(orderId).orElse(null);
+
+    if (order != null) {
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
+    return "redirect:/admin/orders";
 }
 @GetMapping("/success")
 public String checkoutSuccess(Model model) {

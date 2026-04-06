@@ -48,17 +48,27 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .csrf(csrf -> csrf.disable())
 
-        .authorizeHttpRequests(auth -> auth
-            // cho phép vào trang login
-            .requestMatchers("/login").permitAll()
+       .authorizeHttpRequests(auth -> auth
 
-            // chỉ ADMIN mới được thêm / sửa / xóa
-            .requestMatchers("/products/add", "/products/delete/**", "/products/edit/**")
-                .hasRole("ADMIN")
+    // login public
+    .requestMatchers("/login").permitAll()
 
-            // tất cả request còn lại phải login
-            .anyRequest().authenticated()
-        )
+    // ================= PRODUCT =================
+    .requestMatchers("/products/add", "/products/delete/**", "/products/edit/**")
+        .hasRole("ADMIN")
+
+    // ================= ORDER =================
+    // admin quản lý đơn
+    .requestMatchers("/cart/admin/**")
+        .hasRole("ADMIN")
+
+    // user xem đơn của mình
+    .requestMatchers("/cart/my-orders")
+        .authenticated()
+
+    // ================= DEFAULT =================
+    .anyRequest().authenticated()
+)
 
         .formLogin(form -> form
             .loginPage("/login")
