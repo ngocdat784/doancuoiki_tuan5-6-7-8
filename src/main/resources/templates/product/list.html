@@ -145,9 +145,17 @@
         </div>
 
        <div sec:authorize="hasRole('ADMIN')">
+
+    <!-- CREATE PRODUCT -->
     <a th:href="@{/products/add}" class="btn btn-primary mb-3">
         + Create New Product
     </a>
+
+    <!-- CATEGORY MANAGEMENT -->
+    <a th:href="@{/categories}" class="btn btn-warning mb-3 ms-2">
+        Manage Categories
+    </a>
+
 </div>
 
         <!-- TABLE -->
