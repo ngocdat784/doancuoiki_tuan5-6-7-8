@@ -16,6 +16,11 @@
 <div layout:fragment="content" class="container mt-4">
 
     <h2>Quản lý đơn hàng (Admin)</h2>
+    <!-- THÔNG BÁO -->
+<div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
 
     <table class="table table-bordered text-center">
         <thead class="table-dark">
@@ -45,9 +50,15 @@
 
             <!-- CURRENT STATUS -->
             <td>
-                <span class="badge bg-secondary"
-                      th:text="${o.status}">
-                </span>
+                <span class="badge"
+      th:classappend="${o.status != null ?
+            (o.status.name() == 'PENDING' ? 'bg-warning' :
+            (o.status.name() == 'CONFIRMED' ? 'bg-info' :
+            (o.status.name() == 'SHIPPING' ? 'bg-primary' :
+            (o.status.name() == 'COMPLETED' ? 'bg-success' : 'bg-danger'))))
+            : 'bg-secondary'}"
+      th:text="${o.status}">
+</span>
             </td>
 
             <!-- UPDATE -->
