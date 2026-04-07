@@ -45,6 +45,14 @@
             font-weight: bold;
             margin-bottom: 20px;
         }
+        .star {
+    color: gold;
+    font-size: 16px;
+}
+
+.star-gray {
+    color: #ccc;
+}
     </style>
 </head>
 
@@ -185,6 +193,7 @@
                 <th>Image</th>
                 <th>Price</th>
                 <th>Category</th>
+                <th>Rating</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -210,7 +219,25 @@
                 </td>
 
                 <td th:text="${p.category != null ? p.category.name : 'N/A'}"></td>
+<td>
 
+    <!-- AVG RATING -->
+    <div th:with="avg=${reviewService.getAverageRating(p.id)}">
+
+        <!-- SỐ SAO -->
+        <span th:each="i : ${#numbers.sequence(1,5)}">
+            <i class="star"
+               th:classappend="${i <= avg} ? '' : 'star-gray'">★</i>
+        </span>
+
+        <!-- SỐ ĐIỂM -->
+        <div>
+            <small th:text="${#numbers.formatDecimal(avg,1,1)} + ' / 5'"></small>
+        </div>
+
+    </div>
+
+</td>
               <td>
 
     <!-- USER + ADMIN đều thấy -->

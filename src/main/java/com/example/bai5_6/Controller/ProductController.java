@@ -1,5 +1,7 @@
 package com.example.bai5_6.Controller;
 
+import java.security.Principal;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -8,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.bai5_6.Model.Product;
 import com.example.bai5_6.Service.CategoryService;
 import com.example.bai5_6.Service.ProductService;
-
+import com.example.bai5_6.Service.ReviewService;
+import com.example.bai5_6.Model.Review;
 import org.springframework.ui.Model;
 
 @Controller
@@ -20,6 +23,8 @@ public class ProductController {
 
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+private ReviewService reviewService;
 
     @GetMapping
 public String listProducts(
@@ -37,6 +42,10 @@ public String listProducts(
     }
 
     model.addAttribute("products", productPage.getContent());
+
+    // ✅ THÊM: map avg rating
+    model.addAttribute("reviewService", reviewService);
+
     model.addAttribute("currentPage", page);
     model.addAttribute("totalPages", productPage.getTotalPages());
     model.addAttribute("sortDir", sortDir);
@@ -45,7 +54,6 @@ public String listProducts(
 
     return "product/list";
 }
-
     // ================== ADD ==================
     @GetMapping("/add")
     public String showAddForm(Model model) {
@@ -76,8 +84,27 @@ public String listProducts(
         productService.deleteProduct(id);
         return "redirect:/products";
     }
+@GetMapping("/{id}")
+public String productDetail(@PathVariable Integer id, Model model, Principal principal) {
 
-   @GetMapping("/search")
+    Product product = productService.getProductById(id);
+    List<Review> reviews = reviewService.getReviewsByProduct(id);
+
+    double avgRating = reviewService.getAverageRating(id);
+
+    model.addAttribute("product", product);
+    model.addAttribute("reviews", reviews);
+    model.addAttribute("avgRating", avgRating);
+
+    // ✅ kiểm tra user đã đánh giá chưa
+    if (principal != null) {
+        Review userReview = reviewService.getUserReview(id, principal.getName());
+        model.addAttribute("userReview", userReview);
+    }
+
+    return "product/detail";
+}
+  @GetMapping("/search")
 public String searchProduct(
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) Integer categoryId,
@@ -89,6 +116,10 @@ public String searchProduct(
             productService.searchAndFilter(keyword, categoryId, page, sortDir);
 
     model.addAttribute("products", productPage.getContent());
+
+    // ✅ THÊM
+    model.addAttribute("reviewService", reviewService);
+
     model.addAttribute("currentPage", page);
     model.addAttribute("totalPages", productPage.getTotalPages());
     model.addAttribute("keyword", keyword);
@@ -98,5 +129,14 @@ public String searchProduct(
 
     return "product/list";
 }
+@PostMapping("/review")
+public String addReview(@RequestParam Integer productId,
+                        @RequestParam int rating,
+                        @RequestParam String comment,
+                        Principal principal) {
 
+    reviewService.saveReview(productId, rating, comment, principal.getName());
+
+    return "redirect:/products/" + productId;
+}
 }
