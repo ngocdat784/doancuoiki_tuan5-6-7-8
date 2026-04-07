@@ -14,6 +14,7 @@
         <div class="card p-4 shadow">
 
             <h3 class="text-center mb-3">Login</h3>
+            
 
             <form th:action="@{/login}" method="post">
 
@@ -26,6 +27,12 @@
                 </div>
 
                 <button class="btn btn-primary w-100">Login</button>
+                <div class="text-center mt-3">
+    <span>Chưa có tài khoản?</span>
+    <a th:href="@{/register}" class="text-decoration-none">
+        Đăng ký
+    </a>
+</div>
 
             </form>
 

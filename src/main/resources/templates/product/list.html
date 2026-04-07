@@ -245,6 +245,13 @@
        class="btn btn-success btn-sm">
         Add to Cart
     </a>
+    <!-- USER đánh giá -->
+<span sec:authorize="hasRole('USER')">
+    <a th:href="@{/products/{id}(id=${p.id})}"
+       class="btn btn-warning btn-sm">
+        Đánh giá
+    </a>
+</span>
 
     <!-- Chỉ ADMIN thấy -->
     <span sec:authorize="hasRole('ADMIN')">
