@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.bai5_6.Model.Product;
 import com.example.bai5_6.Service.CategoryService;
+import com.example.bai5_6.Service.ProductClickService;
 import com.example.bai5_6.Service.ProductService;
 import com.example.bai5_6.Service.ReviewService;
 import com.example.bai5_6.Model.Review;
@@ -27,13 +28,15 @@ public class ProductController {
     private CategoryService categoryService;
     @Autowired
 private ReviewService reviewService;
-
+@Autowired
+private ProductClickService productClickService;
     @GetMapping
 public String listProducts(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "asc") String sortDir,
         @RequestParam(required = false) Integer categoryId,
-        Model model) {
+        Model model,
+        Principal principal) {
 
     Page<Product> productPage;
 
@@ -42,16 +45,28 @@ public String listProducts(
     } else {
         productPage = productService.getProducts(page, sortDir);
     }
+
     Map<Integer, List<Product>> productsByCategory =
         productPage.getContent().stream()
-        .collect(Collectors.groupingBy(p -> 
+        .collect(Collectors.groupingBy(p ->
             p.getCategory() != null ? p.getCategory().getId() : 0
         ));
 
     model.addAttribute("products", productPage.getContent());
+    model.addAttribute("productsByCategory", productsByCategory);
 
-    // ✅ THÊM: map avg rating
+    // ✅ REVIEW
     model.addAttribute("reviewService", reviewService);
+
+    // 🔥 BÁN CHẠY (GLOBAL)
+    model.addAttribute("topGlobal",
+            productClickService.getTop3Global());
+
+    // 🔥 ĐỀ XUẤT (USER)
+    if (principal != null) {
+        model.addAttribute("topUser",
+                productClickService.getTop3ByUser(principal.getName()));
+    }
 
     model.addAttribute("currentPage", page);
     model.addAttribute("totalPages", productPage.getTotalPages());

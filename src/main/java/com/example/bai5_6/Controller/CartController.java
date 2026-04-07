@@ -6,6 +6,7 @@ import com.example.bai5_6.Model.OrderDetail;
 import com.example.bai5_6.Model.Product;
 import com.example.bai5_6.Repository.OrderDetailRepository;
 import com.example.bai5_6.Repository.OrderRepository;
+import com.example.bai5_6.Service.ProductClickService;
 import com.example.bai5_6.Service.ProductService;
 
 import jakarta.servlet.http.HttpSession;
@@ -32,10 +33,19 @@ private OrderRepository orderRepository;
 
 @Autowired
 private OrderDetailRepository orderDetailRepository;
+@Autowired
+private ProductClickService productClickService;
 
-  @GetMapping("/add/{id}")
-public String addToCart(@PathVariable("id") Integer id, HttpSession session) {
+ @GetMapping("/add/{id}")
+public String addToCart(@PathVariable("id") Integer id,
+                        HttpSession session,
+                        Principal principal) {
 
+    // ================= CLICK TRACKING =================
+    String username = (principal != null) ? principal.getName() : null;
+    productClickService.increaseClick(id, username);
+
+    // ================= CART LOGIC (code cũ) =================
     Product product = productService.getProductById(id);
 
     List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
@@ -48,7 +58,7 @@ public String addToCart(@PathVariable("id") Integer id, HttpSession session) {
 
     for (CartItem item : cart) {
         if (item.getProductId().equals(product.getId())) {
-            // ❌ KHÔNG tăng số lượng nữa
+            // ❌ không tăng số lượng
             found = true;
             break;
         }
@@ -69,7 +79,6 @@ public String addToCart(@PathVariable("id") Integer id, HttpSession session) {
 
     return "redirect:/cart";
 }
-
     // ================== VIEW CART ==================
     @GetMapping("")
     public String viewCart(HttpSession session, Model model) {
