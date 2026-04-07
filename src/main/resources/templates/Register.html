@@ -42,7 +42,9 @@
                     Đăng nhập
                 </a>
             </div>
-
+<div th:if="${error}" class="alert alert-danger">
+    <span th:text="${error}"></span>
+</div>
         </div>
 
     </div>

@@ -2,6 +2,7 @@ package com.example.bai5_6.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,14 +21,16 @@ public class AuthController {
         return "register";
     }
 
-    // xử lý đăng ký
     @PostMapping("/register")
-    public String register(@RequestParam String username,
-                           @RequestParam String password) {
-
+public String doRegister(@RequestParam String username,
+                         @RequestParam String password,
+                         Model model) {
+    try {
         accountService.register(username, password);
-
-        // ✅ đăng ký xong quay lại login
         return "redirect:/login";
+    } catch (Exception e) {
+        model.addAttribute("error", e.getMessage());
+        return "register";
     }
+}
 }

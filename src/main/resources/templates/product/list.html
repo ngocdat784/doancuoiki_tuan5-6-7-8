@@ -53,6 +53,14 @@
 .star-gray {
     color: #ccc;
 }
+.card img {
+    object-fit: cover;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    transition: 0.3s;
+}
     </style>
 </head>
 
@@ -63,52 +71,47 @@
     <div class="card-custom">
 
         <h2>Product Management</h2>
+
         <!-- ORDER NAVIGATION -->
-<div class="mb-3">
+        <div class="mb-3">
 
-    <!-- USER -->
-    <span sec:authorize="hasRole('USER')">
-        <a th:href="@{/cart/my-orders}" class="btn btn-info">
-            Lịch sử đặt hàng
-        </a>
-    </span>
+            <span sec:authorize="hasRole('USER')">
+                <a th:href="@{/cart/my-orders}" class="btn btn-info">
+                    Lịch sử đặt hàng
+                </a>
+            </span>
 
-    <!-- ADMIN -->
-    <span sec:authorize="hasRole('ADMIN')">
-        <a th:href="@{/cart/admin/orders}" class="btn btn-dark">
-            Quản lý đơn hàng
-        </a>
-    </span>
+            <span sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/cart/admin/orders}" class="btn btn-dark">
+                    Quản lý đơn hàng
+                </a>
+            </span>
 
-</div>
+        </div>
 
-<!-- USER INFO -->
-<div sec:authorize="isAuthenticated()" class="mb-3 text-end">
+        <!-- USER INFO -->
+        <div sec:authorize="isAuthenticated()" class="mb-3 text-end">
 
-    <!-- Username -->
-    <span class="me-3">
-        User:
-        <b sec:authentication="name"></b>
-    </span>
+            <span class="me-3">
+                User:
+                <b sec:authentication="name"></b>
+            </span>
 
-    <!-- Roles -->
-    <span class="me-3">
-        <span class="badge bg-info text-dark me-1"
-              th:each="auth : ${#authentication.authorities}"
-              th:if="${#strings.contains(auth.authority, 'ROLE_')}"
-              th:text="${#strings.replace(auth.authority, 'ROLE_', '')}">
-        </span>
-    </span>
+            <span class="me-3">
+                <span class="badge bg-info text-dark me-1"
+                      th:each="auth : ${#authentication.authorities}"
+                      th:if="${#strings.contains(auth.authority, 'ROLE_')}"
+                      th:text="${#strings.replace(auth.authority, 'ROLE_', '')}">
+                </span>
+            </span>
 
-    <!-- Logout -->
-    <form th:action="@{/logout}" method="post" style="display:inline;">
-        <button class="btn btn-danger btn-sm">
-            Logout
-        </button>
-    </form>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button class="btn btn-danger btn-sm">
+                    Logout
+                </button>
+            </form>
 
-</div>
-
+        </div>
 
         <!-- SEARCH + SORT + FILTER -->
         <div class="row mb-3">
@@ -121,7 +124,6 @@
                            placeholder="Nhập tên sản phẩm..."
                            th:value="${keyword}">
 
-                    <!-- giữ sort + category -->
                     <input type="hidden" name="sortDir" th:value="${sortDir}">
                     <input type="hidden" name="categoryId" th:value="${categoryId}">
 
@@ -131,9 +133,7 @@
 
             <!-- SORT -->
             <div class="col-md-3">
-                <form method="get"
-                      th:action="@{/products/search}">
-
+                <form method="get" th:action="@{/products/search}">
                     <input type="hidden" name="keyword" th:value="${keyword}">
                     <input type="hidden" name="categoryId" th:value="${categoryId}">
 
@@ -144,10 +144,9 @@
                 </form>
             </div>
 
-            <!-- FILTER CATEGORY -->
+            <!-- FILTER -->
             <div class="col-md-3">
                 <form method="get" th:action="@{/products/search}">
-
                     <input type="hidden" name="keyword" th:value="${keyword}">
                     <input type="hidden" name="sortDir" th:value="${sortDir}">
 
@@ -165,114 +164,139 @@
 
         </div>
 
-        <!-- Keyword -->
-        <div th:if="${keyword != null}">
-            <p>Kết quả tìm kiếm: <b th:text="${keyword}"></b></p>
+        <!-- ================= USER VIEW ================= -->
+        <div sec:authorize="hasRole('USER')">
+
+            <div th:if="${#lists.isEmpty(products)}" class="text-danger">
+                Không có sản phẩm
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-3 mb-4" th:each="p : ${products}">
+
+                    <div class="card h-100 shadow-sm">
+
+                        <img th:src="${p.image}" class="card-img-top" height="180">
+
+                        <div class="card-body text-center">
+
+                            <h6 th:text="${p.name}"></h6>
+
+                            <p class="text-success fw-bold"
+                               th:text="${p.price}"></p>
+
+                            <small th:text="${p.category != null ? p.category.name : 'N/A'}"></small>
+
+                            <!-- ⭐ RATING -->
+                            <div th:with="avg=${reviewService.getAverageRating(p.id)}">
+
+                                <span th:each="i : ${#numbers.sequence(1,5)}">
+                                    <i class="star"
+                                       th:classappend="${i <= avg} ? '' : 'star-gray'">★</i>
+                                </span>
+
+                                <div>
+                                    <small th:text="${#numbers.formatDecimal(avg,1,1)} + ' / 5'"></small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer text-center">
+
+                            <a th:href="@{/cart/add/{id}(id=${p.id})}"
+                               class="btn btn-success btn-sm">
+                                Add
+                            </a>
+
+                            <a th:href="@{/products/{id}(id=${p.id})}"
+                               class="btn btn-warning btn-sm">
+                                Đánh giá
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
-       <div sec:authorize="hasRole('ADMIN')">
+        <!-- ================= ADMIN VIEW ================= -->
+        <div sec:authorize="hasRole('ADMIN')">
 
-    <!-- CREATE PRODUCT -->
-    <a th:href="@{/products/add}" class="btn btn-primary mb-3">
-        + Create New Product
-    </a>
+            <table class="table table-striped text-center">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>Rating</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
 
-    <!-- CATEGORY MANAGEMENT -->
-    <a th:href="@{/categories}" class="btn btn-warning mb-3 ms-2">
-        Manage Categories
-    </a>
+                <tbody>
 
-</div>
+                <tr th:if="${#lists.isEmpty(products)}">
+                    <td colspan="7" class="text-danger">Không có sản phẩm</td>
+                </tr>
 
-        <!-- TABLE -->
-        <table class="table table-striped text-center">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Image</th>
-                <th>Price</th>
-                <th>Category</th>
-                <th>Rating</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
+                <tr th:each="p : ${products}">
+                    <td th:text="${p.id}"></td>
+                    <td th:text="${p.name}"></td>
 
-            <tbody>
+                    <td>
+                        <img th:src="${p.image}" width="100">
+                    </td>
 
-            <!-- Empty -->
-            <tr th:if="${#lists.isEmpty(products)}">
-                <td colspan="6" class="text-danger">Không có sản phẩm</td>
-            </tr>
+                    <td>
+                        <span class="badge bg-success" th:text="${p.price}"></span>
+                    </td>
 
-            <!-- Data -->
-            <tr th:each="p : ${products}">
-                <td th:text="${p.id}"></td>
-                <td th:text="${p.name}"></td>
+                    <td th:text="${p.category != null ? p.category.name : 'N/A'}"></td>
 
-                <td>
-                    <img th:src="${p.image}" width="100">
-                </td>
+                    <td>
+                        <div th:with="avg=${reviewService.getAverageRating(p.id)}">
 
-                <td>
-                    <span class="badge bg-success" th:text="${p.price}"></span>
-                </td>
+                            <span th:each="i : ${#numbers.sequence(1,5)}">
+                                <i class="star"
+                                   th:classappend="${i <= avg} ? '' : 'star-gray'">★</i>
+                            </span>
 
-                <td th:text="${p.category != null ? p.category.name : 'N/A'}"></td>
-<td>
+                            <div>
+                                <small th:text="${#numbers.formatDecimal(avg,1,1)} + ' / 5'"></small>
+                            </div>
 
-    <!-- AVG RATING -->
-    <div th:with="avg=${reviewService.getAverageRating(p.id)}">
+                        </div>
+                    </td>
 
-        <!-- SỐ SAO -->
-        <span th:each="i : ${#numbers.sequence(1,5)}">
-            <i class="star"
-               th:classappend="${i <= avg} ? '' : 'star-gray'">★</i>
-        </span>
+                    <td>
+                        
 
-        <!-- SỐ ĐIỂM -->
-        <div>
-            <small th:text="${#numbers.formatDecimal(avg,1,1)} + ' / 5'"></small>
+                        <a th:href="@{/products/edit/{id}(id=${p.id})}"
+                           class="btn btn-secondary btn-sm">Edit</a>
+
+                        <a th:href="@{/products/delete/{id}(id=${p.id})}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Xóa?')">Delete</a>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
         </div>
-
-    </div>
-
-</td>
-              <td>
-
-    <!-- USER + ADMIN đều thấy -->
-    <a th:href="@{/cart/add/{id}(id=${p.id})}"
-       class="btn btn-success btn-sm">
-        Add to Cart
-    </a>
-    <!-- USER đánh giá -->
-<span sec:authorize="hasRole('USER')">
-    <a th:href="@{/products/{id}(id=${p.id})}"
-       class="btn btn-warning btn-sm">
-        Đánh giá
-    </a>
-</span>
-
-    <!-- Chỉ ADMIN thấy -->
-    <span sec:authorize="hasRole('ADMIN')">
-        <a th:href="@{/products/edit/{id}(id=${p.id})}"
-           class="btn btn-secondary btn-sm">Edit</a>
-
-        <a th:href="@{/products/delete/{id}(id=${p.id})}"
-           class="btn btn-danger btn-sm"
-           onclick="return confirm('Xóa?')">Delete</a>
-    </span>
-
-</td>
-            </tr>
-
-            </tbody>
-        </table>
 
         <!-- PAGINATION -->
         <div class="d-flex justify-content-center mt-4">
 
-            <!-- Previous -->
             <a th:if="${currentPage > 0}"
                th:href="@{/products/search(
                     keyword=${keyword},
@@ -281,13 +305,11 @@
                     sortDir=${sortDir})}"
                class="btn btn-secondary me-2">Previous</a>
 
-            <!-- Page -->
             <span class="mx-3">
                 Trang <b th:text="${currentPage + 1}"></b> /
                 <b th:text="${totalPages}"></b>
             </span>
 
-            <!-- Next -->
             <a th:if="${currentPage < totalPages - 1}"
                th:href="@{/products/search(
                     keyword=${keyword},

@@ -2,6 +2,8 @@ package com.example.bai5_6.Controller;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -40,6 +42,11 @@ public String listProducts(
     } else {
         productPage = productService.getProducts(page, sortDir);
     }
+    Map<Integer, List<Product>> productsByCategory =
+        productPage.getContent().stream()
+        .collect(Collectors.groupingBy(p -> 
+            p.getCategory() != null ? p.getCategory().getId() : 0
+        ));
 
     model.addAttribute("products", productPage.getContent());
 
