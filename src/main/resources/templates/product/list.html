@@ -166,31 +166,31 @@
 
         <!-- ================= USER VIEW ================= -->
         <div sec:authorize="hasRole('USER')">
-            <!-- 🔥 BÁN CHẠY -->
-<div th:if="${topGlobal != null and !#lists.isEmpty(topGlobal)}" class="mb-4">
+           <div th:if="${topGlobal != null and !#lists.isEmpty(topGlobal)}" class="mb-4">
 
     <h4 class="text-danger">🔥 Bán chạy nhất</h4>
 
     <div class="row">
 
-        <div class="col-md-3 mb-3" th:each="p : ${topGlobal}">
+        <div class="col-md-3 mb-3" th:each="pc : ${topGlobal}">
 
             <div class="card h-100 border-danger shadow-sm">
 
-                <img th:src="${p.image}" class="card-img-top" height="150">
+                <img th:src="${pc.product.image}" class="card-img-top" height="150">
 
                 <div class="card-body text-center">
 
-                    <h6 th:text="${p.name}"></h6>
+                    <h6 th:text="${pc.product.name}"></h6>
 
                     <p class="text-success fw-bold"
-                       th:text="${p.price}"></p>
+                       th:text="${pc.product.price}"></p>
+
 
                 </div>
 
                 <div class="card-footer text-center">
 
-                    <a th:href="@{/cart/add/{id}(id=${p.id})}"
+                    <a th:href="@{/cart/add/{id}(id=${pc.product.id})}"
                        class="btn btn-sm btn-success">Add</a>
 
                 </div>
@@ -203,31 +203,32 @@
 
 </div>
 
-<!-- ✨ ĐỀ XUẤT -->
 <div th:if="${topUser != null and !#lists.isEmpty(topUser)}" class="mb-4">
 
     <h4 class="text-primary">✨ Đề xuất cho bạn</h4>
 
     <div class="row">
 
-        <div class="col-md-3 mb-3" th:each="p : ${topUser}">
+        <div class="col-md-3 mb-3" th:each="pc : ${topUser}">
 
             <div class="card h-100 border-primary shadow-sm">
 
-                <img th:src="${p.image}" class="card-img-top" height="150">
+                <img th:src="${pc.product.image}" class="card-img-top" height="150">
 
                 <div class="card-body text-center">
 
-                    <h6 th:text="${p.name}"></h6>
+                    <h6 th:text="${pc.product.name}"></h6>
 
                     <p class="text-success fw-bold"
-                       th:text="${p.price}"></p>
+                       th:text="${pc.product.price}"></p>
+
+                    
 
                 </div>
 
                 <div class="card-footer text-center">
 
-                    <a th:href="@{/cart/add/{id}(id=${p.id})}"
+                    <a th:href="@{/cart/add/{id}(id=${pc.product.id})}"
                        class="btn btn-sm btn-success">Add</a>
 
                 </div>
